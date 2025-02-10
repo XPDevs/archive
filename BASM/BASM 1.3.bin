@@ -1,0 +1,50 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+echo "Compiling: ./BASM <input.kjs>"
+exit 1
+fi
+# START OF MY OWN ENVIREMRNT
+if [[ "$1" == "--version" ]]; then
+echo "Upated: thrusday 26th 2024"
+echo "BASM Version:"
+echo "1.3"
+exit
+fi
+if [[ "$1" == "--help" ]]; then
+echo "Compiling: ./BASM <input.kjs>"
+exit
+fi
+# warning:
+echo -e "\e[31mWARNING: BASM only turns javscript to binary\e[0m"
+echo -e "\e[31mIt is not meant to create actual operating system components\e[0m"
+# END
+# compiler script
+input_file="$1"
+output_file="${input_file%.kjs}.bin"
+echo "Starting process..."
+BAR_LENGTH=29
+PROGRESS=0
+
+# Function to display the loading bar
+draw_bar() {
+  local FILLED=$((BAR_LENGTH * PROGRESS / 100))
+  local EMPTY=$((BAR_LENGTH - FILLED))
+  local FILLED_BAR=$(printf "%0.s#" $(seq 1 $FILLED))
+  local EMPTY_BAR=$(printf "%0.s " $(seq 1 $EMPTY))
+  printf "\r[%s%s] %d%%" "$FILLED_BAR" "$EMPTY_BAR" "$PROGRESS"
+}
+
+# Simulate progress
+for ((i=0; i<=100; i+=1)); do
+  PROGRESS=$i
+  draw_bar
+  sleep 1
+done
+mv "$input_file" "$output_file"
+if [ -f "$output_file" ]; then
+echo "Compiling successful :)"
+echo "Saved as: $output_file"
+else
+echo "Compiling unsuccessful :("
+fi
+

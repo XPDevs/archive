@@ -1,0 +1,84 @@
+#!/bin/bash
+if [ "$#" -ne 1 ]; then
+echo "Compiling: ./BASM <input.kjs>"
+exit 1
+fi
+# START OF MY OWN ENVIREMRNT
+if [[ "$1" == "--version" ]]; then
+echo "Upated: thrusday 26th 2024"
+echo "BASM Version:"
+echo "1.2"
+exit
+fi
+if [[ "$1" == "--help" ]]; then
+echo "Compiling: ./BASM <input.kjs>"
+exit
+fi
+# warning:
+echo -e "\e[31mWARNING: BASM only turns javscript to binary\e[0m"
+echo -e "\e[31mIt is not meant to create actual operating system components\e[0m"
+# END
+# compiler script
+input_file="$1"
+output_file="${input_file%.kjs}.bin"
+echo "Searching for the info.txt"
+sleep 2
+file_path="info.txt"
+if [[ -f "$file_path" ]]; then
+version=$(<"$file_path")
+echo "info.txt found, setting version from the file"
+text=File_version=$version
+built=Compiled_by_BASM_by_XPDevs
+sleep 2
+else
+echo "No info.txt found, this file must exist to compile the file"
+exit 0
+fi
+echo "Starting process..."
+sleep 2
+file="$input_file"
+while IFS= read -r line
+do
+echo "$line"
+sleep 0.1
+done < "$file"
+sleep 2
+mv "$input_file" "$output_file"
+echo "$text" >> "$output_file"
+echo "$built" >> "$output_file"
+if [ -f "$output_file" ]; then
+echo ""
+echo "Compiling successful :)"
+sleep 2
+echo "Making $output_file an executable..."
+# Initialize variables
+BAR_LENGTH=29
+PROGRESS=0
+
+# Function to display the loading bar
+draw_bar() {
+  local FILLED=$((BAR_LENGTH * PROGRESS / 100))
+  local EMPTY=$((BAR_LENGTH - FILLED))
+  local FILLED_BAR=$(printf "%0.s#" $(seq 1 $FILLED))
+  local EMPTY_BAR=$(printf "%0.s " $(seq 1 $EMPTY))
+  printf "\r[%s%s] %d%%" "$FILLED_BAR" "$EMPTY_BAR" "$PROGRESS"
+}
+
+# Simulate progress
+for ((i=0; i<=100; i+=1)); do
+  PROGRESS=$i
+  draw_bar
+  sleep 0.3
+done
+echo ""
+chmod +X "$output_file"
+echo ""
+echo "Saved as: $output_file"
+else
+echo "Compiling unsuccessful :("
+fi
+fi
+else
+echo "Invalid choice, please retry "
+fi
+

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload and Compiler</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            border: 1px solid #333;
+            border-radius: 10px;
+            background-color: #252526;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        input, select, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #333;
+            border-radius: 5px;
+        }
+
+        input:focus, select:focus, button:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+
+        button {
+            background-color: #007acc;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        button:hover:enabled {
+            background-color: #005a9e;
+        }
+
+        #compilerOutput {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #1e1e1e;
+            color: #9cdcfe;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            border: 1px solid #333;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        h2 {
+            color: #569cd6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>File Upload and Compiler</h2>
+
+        <!-- File upload input -->
+        <input type="file" id="fileInput" accept="*">
+
+        <!-- User-defined file name -->
+        <input type="text" id="customFileName" placeholder="Enter file name (without extension)">
+
+        <!-- OS section dropdown -->
+        <select id="osSection">
+            <option disabled selected>Select OS section</option>
+            <option value="kernel">Kernel</option>
+            <option value="drivers">Drivers</option>
+            <option value="system">System Files</option>
+            <option value="applications">Applications</option>
+            <option value="configuration">Configuration</option>
+            <option value="logs">Logs</option>
+        </select>
+
+        <!-- Dropdown with file type options -->
+        <select id="fileOptions">
+            <option disabled selected>Select a file type</option>
+            <script>
+                // List of common OS file types
+                const fileTypes = [
+                    "exe", "dll", "sys", "bat", "sh", "bin", "elf", "img", "iso", "vmdk", "ovf", "qcow2", 
+                    "log", "ini", "conf", "cfg", "txt", "json", "xml", "yaml", "js", "html", "css", 
+                    "php", "asp", "aspx", "jsp", "rb", "py", "pl", "c", "cpp", "h", "java", "class", 
+                    "jar", "cs", "vb", "swift", "kt", "m", "mm", "go", "rs", "ts", "tsx", 
+                    "db", "sqlite", "sql", "mdf", "ldf", "bak", "csv", "xls", "xlsx", "ppt", "pptx", 
+                    "doc", "docx", "rtf", "odt", "odp", "ods", "pdf", "epub", "mobi", "azw", "fb2", 
+                    "png", "jpg", "jpeg", "bmp", "gif", "tiff", "ico", "svg", "mp3", "wav", "flac", "ogg", 
+                    "mp4", "mkv", "avi", "mov", "wmv", "flv", "vob", "mpeg", "mpg", "webm", "3gp", 
+                    "zip", "rar", "7z", "tar", "gz", "bz2", "xz", "dmg", "pkg", "deb", "rpm", "apk"
+                ];
+
+                fileTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = `.${type}`;
+                    document.getElementById('fileOptions').appendChild(option);
+                });
+            </script>
+        </select>
+
+        <!-- Buttons -->
+        <button id="compileButton">Compile</button>
+        <button id="downloadButton" disabled>Download File</button>
+
+        <!-- Compiler output -->
+        <div id="compilerOutput"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const customFileName = document.getElementById('customFileName');;
+        const fileOptions = document.getElementById('fileOptions');
+        const compileButton = document.getElementById('compileButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const compilerOutput = document.getElementById('compilerOutput');
+
+        let uploadedFileContent = null;
+
+        // Handle file upload
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedFileContent = e.target.result;
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Simulate compilation
+        compileButton.addEventListener('click', () => {
+            if (!uploadedFileContent || !customFileName.value || !osSection.value || !fileOptions.value) {
+                alert("Please ensure all fields are completed before compiling.");
+                return;
+            }
+
+            compilerOutput.textContent = "Compiling...\n";
+            const lines = uploadedFileContent.split(/\r?\n/);
+
+            lines.forEach((line, index) => {
+                setTimeout(() => {
+                    compilerOutput.textContent += `${index + 1}: ${line}\n`;
+                    compilerOutput.scrollTop = compilerOutput.scrollHeight;
+
+                    if (index === lines.length - 1) {
+                        downloadButton.disabled = false;
+                    }
+                }, index * 100);
+            });
+        });
+
+        // Handle file download
+        downloadButton.addEventListener('click', () => {
+            const fileName = customFileName.value.trim();
+            const blob = new Blob([uploadedFileContent], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${fileName}.${fileOptions.value}`;
+            a.click();
+
+            URL.revokeObjectURL(url);
+        });
+
+
+    </script>
+</body>
+</html>
